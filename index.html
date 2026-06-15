@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gym App</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
+
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <style>
+        /* Reset i baza */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .card {
+            background-color: #1e1e1e;
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+            border: 1px solid #2a2a2a;
+            width: 100%;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #00ff88;
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: -0.5px;
+        }
+
+        h3 {
+            font-size: 14px;
+            color: #ffffff;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            border-left: 3px solid #00ff88;
+            padding-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            width: 100%;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            background-color: #1a1a1a;
+            color: #fff;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            display: block;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300ff88' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #00ff88;
+            background-color: #222;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.1);
+        }
+
+        textarea {
+            resize: none;
+            min-height: 110px;
+            line-height: 1.5;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: block;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- WITAMY ANIMACJA --- */
+        #welcome-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            z-index: 100;
+        }
+
+        .welcome-text {
+            font-size: 3em;
+            font-weight: bold;
+            color: #00ff88;
+            opacity: 0;
+            transform: scale(0.5);
+            animation: welcomeFadeInZoom 1.5s ease-out forwards, welcomePulse 2s infinite 1.5s;
+        }
+
+        .welcome-subtext {
+            font-size: 1.2em;
+            color: #aaa;
+            margin-top: 10px;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.8s forwards;
+        }
+
+        @keyframes welcomeFadeInZoom {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes welcomePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); text-shadow: 0 0 15px rgba(0, 255, 136, 0.6); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* --- DASHBOARD --- */
+        .user-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .user-header {
+            text-align: left;
+        }
+
+        .user-header .greeting {
+            font-size: 13px;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .user-header .username {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 3px 0 0 0;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-icon-btn {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            color: #ffffff;
+            font-size: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            padding: 0;
+            transition: 0.2s;
+        }
+
+        .profile-icon-btn:hover {
+            border-color: #00ff88;
+            background-color: #252525;
+        }
+
+        .carousel-container {
+            position: relative;
+            background-color: #1a1a1a;
+            border-radius: 18px;
+            border: 1px solid #2a2a2a;
+            padding: 20px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .carousel-content {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .carousel-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .carousel-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00ff88;
+            margin: 6px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .carousel-desc {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .arrow-btn {
+            background: none;
+            border: none;
+            color: #00ff88;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 10px;
+            width: auto;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arrow-btn:disabled {
+            color: #333;
+            cursor: not-allowed;
+        }
+
+        .workout-box {
+            background: linear-gradient(135deg, #1a1a1a 0%, #151515 100%);
+            border: 1px solid #2a2a2a;
+            border-radius: 18px;
+            padding: 20px;
+            margin-top: 5px;
+        }
+
+        .workout-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ff88;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        .workout-details {
+            font-size: 14px;
+            color: #bbb;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        /* --- EDYTOR PLANÓW --- */
+        .plans-editor-section {
+            margin-top: 25px;
+            border-top: 1px dashed #333;
+            padding-top: 20px;
+        }
+
+        .plans-editor-title {
+            font-size: 13px;
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tabs-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 6px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 0;
+            font-size: 11px;
+            font-weight: bold;
+            background-color: #1a1a1a;
+            color: #777;
+            border: 1px solid #333;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background-color: #00ff88;
+            color: #121212;
+            border-color: #00ff88;
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .sub-card {
+            background-color: #161616;
+            padding: 18px;
+            border-radius: 16px;
+            border: 1px solid #252525;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="welcome-screen" class="hidden">
+        <div class="welcome-text">WITAMY</div>
+        <div class="welcome-subtext">Twoja siłownia, Twoje zasady.</div>
+    </div>
+
+    <div class="container">
+        
+        <div id="onboarding-screen" class="card hidden">
+            <h2 id="form-title">Cześć! Poznajmy się 💪</h2>
+            <p id="form-subtitle" style="text-align: center; color: #666; font-size: 13px; margin-bottom: 25px; margin-top: 5px;">Uzupełnij profil, aby zacząć treningi.</p>
+            
+            <form id="onboarding-form">
+                <div class="sub-card">
+                    <div class="form-group">
+                        <label for="nick">NICK</label>
+                        <input type="text" id="nick" required placeholder="np. DzikiDzik">
+                    </div>
+                    <div class="form-group">
+                        <label for="age">WIEK</label>
+                        <input type="number" id="age" required placeholder="np. 25">
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">WAGA (kg)</label>
+                        <input type="number" id="weight" step="0.1" required placeholder="np. 82.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="height">WZROST (cm)</label>
+                        <input type="number" id="height" required placeholder="np. 180">
+                    </div>
+                </div>
+
+                <div id="goal-section-wrapper">
+                    <h3>🎯 Twój Cel Sylwetkowy</h3>
+                    <div class="sub-card">
+                        <div class="form-group">
+                            <label for="goal-select">CEL</label>
+                            <select id="goal-select">
+                                <option value="masa">Przytyć (Masa) 📈</option>
+                                <option value="redukcja">Schudnąć (Redukcja) 📉</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="custom-plans-section" class="plans-editor-section hidden">
+                    <div class="plans-editor-title">⚙️ Mój Plan Tygodniowy</div>
+                    
+                    <div class="tabs-container">
+                        <button type="button" class="tab-btn active" data-day="1">PN</button>
+                        <button type="button" class="tab-btn" data-day="2">WT</button>
+                        <button type="button" class="tab-btn" data-day="3">ŚR</button>
+                        <button type="button" class="tab-btn" data-day="4">CZ</button>
+                        <button type="button" class="tab-btn" data-day="5">PT</button>
+                        <button type="button" class="tab-btn" data-day="6">SB</button>
+                        <button type="button" class="tab-btn" data-day="0">ND</button>
+                    </div>
+                    
+                    <div class="sub-card">
+                        <div id="content-plan-1" class="tab-content active">
+                            <label>Plan na Poniedziałek</label>
+                            <textarea id="plan-1" placeholder="Co dziś trenujesz? Np. Klatka + Plecy..."></textarea>
+                        </div>
+                        <div id="content-plan-2" class="tab-content">
+                            <label>Plan na Wtorek</label>
+                            <textarea id="plan-2" placeholder="Co dziś trenujesz? Np. Nogi + Brzuch..."></textarea>
+                        </div>
+                        <div id="content-plan-3" class="tab-content">
+                            <label>Plan na Środę</label>
+                            <textarea id="plan-3" placeholder="Co dziś trenujesz? Np. Kardio / Wolne..."></textarea>
+                        </div>
+                        <div id="content-plan-4" class="tab-content">
+                            <label>Plan na Czwartek</label>
+                            <textarea id="plan-4" placeholder="Co dziś trenujesz? Np. Push (Barki + Triceps)..."></textarea>
+                        </div>
+                        <div id="content-plan-5" class="tab-content">
+                            <label>Plan na Piątek</label>
+                            <textarea id="plan-5" placeholder="Co dziś trenujesz? Np. Pull (Plecy + Tył barku + Biceps)..."></textarea>
+                        </div>
+                        <div id="content-plan-6" class="tab-content">
+                            <label>Plan na Sobotę</label>
+                            <textarea id="plan-6" placeholder="Co dziś trenujesz? Np. Brzuch + Rozciąganie..."></textarea>
+                        </div>
+                        <div id="content-plan-0" class="tab-content">
+                            <label>Plan na Niedzielę</label>
+                            <textarea id="plan-0" placeholder="Co dziś trenujesz? Np. Wolne / Regeneracja..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" style="background-color: #00ff88; color: #121212; font-weight: 700;">Zapisz i wejdź</button>
+                
+                <button type="button" id="hard-reset-btn" class="hidden" style="background-color: transparent; border: 1px solid #ff3b30; color: #ff3b30; margin-top: 12px; font-size: 13px; padding: 12px; font-weight: 600;">Wyczyść wszystkie dane aplikacji</button>
+            </form>
+        </div>
+
+        <div id="dashboard-screen" class="card dashboard-card hidden">
+            
+            <div class="user-header-container">
+                <div class="user-header">
+                    <p class="greeting" id="current-day-label">Siemanko,</p>
+                    <h1 id="main-username" class="username">Trener</h1>
+                </div>
+                <button id="goto-profile-btn" class="profile-icon-btn" title="Moje Dane">⚙️</button>
+            </div>
+            
+            <div class="carousel-container">
+                <button id="prev-stat" class="arrow-btn">←</button>
+                
+                <div class="carousel-content">
+                    <div id="stat-label" class="carousel-label">Twój Indeks BMI</div>
+                    <div id="stat-value" class="carousel-value">0.0</div>
+                    <div id="stat-desc" class="carousel-desc">Waga w normie ✅</div>
+                </div>
+                
+                <button id="next-stat" class="arrow-btn">→</button>
+            </div>
+
+            <h3>📅 Twój Plan Na Dziś</h3>
+            <div class="workout-box">
+                <div id="today-workout-title" class="workout-title">Trening Siłowy</div>
+                <div id="today-workout-desc" class="workout-details">Rozgrzewka + 4 ćwiczenia główne</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // --- POBIERANIE ELEMENTÓW ---
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const onboardingScreen = document.getElementById('onboarding-screen');
+        const dashboardScreen = document.getElementById('dashboard-screen');
+        
+        const onboardingForm = document.getElementById('onboarding-form');
+        const gotoProfileBtn = document.getElementById('goto-profile-btn');
+        const hardResetBtn = document.getElementById('hard-reset-btn');
+        const formTitle = document.getElementById('form-title');
+        const formSubtitle = document.getElementById('form-subtitle');
+        const customPlansSection = document.getElementById('custom-plans-section');
+        const goalSectionWrapper = document.getElementById('goal-section-wrapper');
+        const goalSelect = document.getElementById('goal-select');
+
+        // Elementy Karuzeli i Nagłówka
+        const mainUsername = document.getElementById('main-username');
+        const currentDayLabel = document.getElementById('current-day-label');
+        const statLabel = document.getElementById('stat-label');
+        const statValue = document.getElementById('stat-value');
+        const statDesc = document.getElementById('stat-desc');
+        const prevStatBtn = document.getElementById('prev-stat');
+        const nextStatBtn = document.getElementById('next-stat');
+
+        // Elementy Dynamicznego Planu
+        const todayWorkoutTitle = document.getElementById('today-workout-title');
+        const todayWorkoutDesc = document.getElementById('today-workout-desc');
+
+        // Zmienne do karuzeli
+        let computedBMI = "0.0";
+        let computedBMIStatus = "";
+        let computedModifierValue = "0 kcal"; 
+        let computedTargetKcal = "0 kcal";
+        let computedGoalDesc = "";
+        
+        const statViews = ["BMI", "MODIFIER", "GOAL"];
+        let currentStatIndex = 0;
+        
+        let isEditingMode = false;
+
+        const defaultWeeklyPlans = {
+            0: { day: "Niedziela 😴", title: "Zasłużony Reset", desc: "Dziś czas na regenerację, długi spacer i ładowanie baterii na nowy tydzień!" },
+            1: { day: "Poniedziałek 💪", title: "Góra Ciała (Klatka + Plecy)", desc: "Główne zadanie: Wyciskanie na płaskiej, Wiosłowanie sztangą, Ściąganie drążka wyciągu oraz Pompki." },
+            2: { day: "Wtorek 🍗", title: "Dół Ciała (Nogi + Brzuch)", desc: "Główne zadanie: Przysiady ze sztangą, Wykroki chodzone, Martwy ciąg na prostych nogach oraz Unoszenie nóg." },
+            3: { day: "Środa 🏃‍♂️", title: "Kardio / Mobilność", desc: "Dziś czas na 30-40 minut ulubionego kardio (bieżnia/rower) + solidna sesja rozciągania całego ciała." },
+            4: { day: "Czwartek 🔥", title: "Push (Klatka + Barki + Triceps)", desc: "Główne zadanie: Wyciskanie żołnierskie, Wyciskanie hantli skos dodatni, Wznosy bokiem oraz Wyciskanie francuskie." },
+            5: { day: "Piątek 🏋️‍♂️", title: "Pull (Plecy + Tył barku + Biceps)", desc: "Główne zadanie: Martwy ciąg klasyczny, Podciąganie na drążku, Face pulls oraz Uginanie ramion z hantlami." },
+            6: { day: "Sobota ⚡", title: "Intensywny HIIT / Core", desc: "Główne zadanie: 20工夫 minut obwodu metabolicznego (burpees, pajacyki, mountain climbers) + deska (plank)." }
+        };
+
+        const dayNames = {
+            0: "Niedziela 😴", 1: "Poniedziałek 💪", 2: "Wtorek 🍗", 3: "Środa 🏃‍♂️", 4: "Czwartek 🔥", 5: "Piątek 🏋️‍♂️", 6: "Sobota ⚡"
+        };
+
+        // --- OBSŁUGA ZAKŁADEK ---
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const day = btn.getAttribute('data-day');
+                
+                tabButtons.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById('content-plan-' + day).classList.add('active');
+            });
+        });
+
+        // --- FUNKCJE ---
+        function showScreen(screen) {
+            [onboardingScreen, dashboardScreen, welcomeScreen].forEach(s => {
+                s.classList.add('hidden');
+            });
+            screen.classList.remove('hidden');
+        }
+
+        function loadTodayWorkoutPlan() {
+            const todayIndex = new Date().getDay(); 
+            const savedPlans = localStorage.getItem('gym_custom_weekly_plans');
+            
+            let currentDayTitle = "Twój Plan";
+            let currentDayDesc = "";
+
+            if (savedPlans) {
+                const userPlans = JSON.parse(savedPlans);
+                if (userPlans[todayIndex] && userPlans[todayIndex].trim() !== "") {
+                    currentDayTitle = "Twój Własny Plan";
+                    currentDayDesc = userPlans[todayIndex];
+                } else {
+                    currentDayTitle = defaultWeeklyPlans[todayIndex].title;
+                    currentDayDesc = defaultWeeklyPlans[todayIndex].desc;
+                }
+            } else {
+                currentDayTitle = defaultWeeklyPlans[todayIndex].title;
+                currentDayDesc = defaultWeeklyPlans[todayIndex].desc;
+            }
+            
+            currentDayLabel.innerText = "Dziś jest " + dayNames[todayIndex];
+            todayWorkoutTitle.innerText = currentDayTitle;
+            todayWorkoutDesc.innerText = currentDayDesc;
+        }
+
+        function populatePlansForm() {
+            const savedPlans = localStorage.getItem('gym_custom_weekly_plans');
+            const userPlans = savedPlans ? JSON.parse(savedPlans) : {};
+            
+            for (let i = 0; i <= 6; i++) {
+                const textarea = document.getElementById('plan-' + i);
+                if (textarea) {
+                    textarea.value = userPlans[i] || (defaultWeeklyPlans[i] ? defaultWeeklyPlans[i].desc : "");
+                }
+            }
+            
+            const todayIndex = new Date().getDay();
+            const targetBtn = document.querySelector(`.tab-btn[data-day="${todayIndex}"]`);
+            if (targetBtn) targetBtn.click();
+        }
+
+        function savePlansFromForm() {
+            const userPlans = {};
+            for (let i = 0; i <= 6; i++) {
+                const textarea = document.getElementById('plan-' + i);
+                if (textarea) {
+                    userPlans[i] = textarea.value;
+                }
+            }
+            localStorage.setItem('gym_custom_weekly_plans', JSON.stringify(userPlans));
+        }
+
+        function calculateFitnessStats(user) {
+            const weight = parseFloat(user.weight);
+            const height = parseFloat(user.height);
+            const age = parseInt(user.age);
+            const goal = user.goal || "masa";
+
+            mainUsername.innerText = user.nick;
+
+            const heightInMeters = height / 100;
+            const bmi = weight / (heightInMeters * heightInMeters);
+            computedBMI = bmi.toFixed(1);
+
+            if (bmi < 18.5) computedBMIStatus = "Niedowaga 🦴";
+            else if (bmi >= 18.5 && bmi < 25) computedBMIStatus = "Waga w normie ✅";
+            else if (bmi >= 25 && bmi < 30) computedBMIStatus = "Nadwaga 📈";
+            else computedBMIStatus = "Otyłość 🚨";
+
+            const bmr = 66.47 + (13.75 * weight) + (5.003 * height) - (6.755 * age);
+            const roundedBMR = Math.round(bmr);
+
+            // Dynamiczne wyliczanie celu na podstawie wybranego pierwotnie celu
+            if (goal === "redukcja") {
+                const target = roundedBMR - 400; 
+                computedTargetKcal = target + " kcal";
+                computedModifierValue = "-400 kcal";
+                computedGoalDesc = `Wycofano z Twojego zera bazowego (${roundedBMR} kcal)`;
+            } else {
+                const target = roundedBMR + 300; 
+                computedTargetKcal = target + " kcal";
+                computedModifierValue = "+300 kcal";
+                computedGoalDesc = `Dodano do Twojego zera bazowego (${roundedBMR} kcal)`;
+            }
+
+            updateCarouselView();
+        }
+
+        function updateCarouselView() {
+            const currentView = statViews[currentStatIndex];
+            
+            prevStatBtn.disabled = (currentStatIndex === 0);
+            nextStatBtn.disabled = (currentStatIndex === statViews.length - 1);
+
+            const userData = localStorage.getItem('gym_user_data');
+            const user = userData ? JSON.parse(userData) : {};
+            const currentGoal = user.goal || "masa";
+
+            if (currentView === "BMI") {
+                statLabel.innerText = "Twój Indeks BMI";
+                statValue.innerText = computedBMI;
+                statDesc.innerText = computedBMIStatus;
+            } else if (currentView === "MODIFIER") {
+                statLabel.innerText = currentGoal === "redukcja" ? "Wyliczony Deficyt" : "Wyliczona Nadwyżka";
+                statValue.innerText = computedModifierValue;
+                statDesc.innerText = computedGoalDesc;
+            } else if (currentView === "GOAL") {
+                statLabel.innerText = "Dzienny Limit Kalorii";
+                statValue.innerText = computedTargetKcal;
+                statDesc.innerText = currentGoal === "redukcja" ? "Twój ostateczny cel na redukcję" : "Twój ostateczny cel na masę";
+            }
+        }
+
+        function checkApplicationState() {
+            const userData = localStorage.getItem('gym_user_data');
+            loadTodayWorkoutPlan();
+
+            if (userData) {
+                const user = JSON.parse(userData);
+                calculateFitnessStats(user);
+                runWelcomeAnimationAndContinue();
+            } else {
+                isEditingMode = false;
+                formTitle.innerText = "Cześć! Poznajmy się 💪";
+                formSubtitle.innerText = "Uzupełnij profil, aby zacząć treningi.";
+                hardResetBtn.classList.add('hidden');
+                customPlansSection.classList.add('hidden'); 
+                goalSectionWrapper.classList.remove('hidden'); // Pokazuje wybór celu przy rejestracji
+                showScreen(onboardingScreen);
+            }
+        }
+
+        nextStatBtn.addEventListener('click', function() {
+            if (currentStatIndex < statViews.length - 1) {
+                currentStatIndex++;
+                updateCarouselView();
+            }
+        });
+
+        prevStatBtn.addEventListener('click', function() {
+            if (currentStatIndex > 0) {
+                currentStatIndex--;
+                updateCarouselView();
+            }
+        });
+
+        onboardingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let userObj = {};
+            const userData = localStorage.getItem('gym_user_data');
+            
+            if (isEditingMode && userData) {
+                // W trybie edycji (ustawienia) zachowujemy stary cel, bo pole zniknęło z widoku
+                const oldUser = JSON.parse(userData);
+                userObj = {
+                    nick: document.getElementById('nick').value,
+                    age: document.getElementById('age').value,
+                    weight: document.getElementById('weight').value,
+                    height: document.getElementById('height').value,
+                    goal: oldUser.goal || "masa"
+                };
+            } else {
+                // Przy pierwszej rejestracji bierzemy wartość z selecta
+                userObj = {
+                    nick: document.getElementById('nick').value,
+                    age: document.getElementById('age').value,
+                    weight: document.getElementById('weight').value,
+                    height: document.getElementById('height').value,
+                    goal: goalSelect.value
+                };
+            }
+            
+            localStorage.setItem('gym_user_data', JSON.stringify(userObj));
+            calculateFitnessStats(userObj);
+            
+            if (isEditingMode) {
+                savePlansFromForm(); 
+                loadTodayWorkoutPlan(); 
+                showScreen(dashboardScreen);
+            } else {
+                runWelcomeAnimationAndContinue();
+            }
+        });
+
+        gotoProfileBtn.addEventListener('click', function() {
+            isEditingMode = true;
+            
+            const userData = localStorage.getItem('gym_user_data');
+            if (userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('nick').value = user.nick;
+                document.getElementById('age').value = user.age;
+                document.getElementById('weight').value = user.weight;
+                document.getElementById('height').value = user.height;
+            }
+            
+            formTitle.innerText = "Ustawienia ⚙️";
+            formSubtitle.innerText = "Zaktualizuj profil oraz swój plan treningowy.";
+            
+            populatePlansForm(); 
+            
+            hardResetBtn.classList.remove('hidden'); 
+            customPlansSection.classList.remove('hidden'); 
+            goalSectionWrapper.classList.add('hidden'); // Ukrywa sekcję wyboru celu w ustawieniach
+            showScreen(onboardingScreen);
+        });
+
+        hardResetBtn.addEventListener('click', function() {
+            if (confirm("Czy na pewno chcesz usunąć wszystkie dane, własne plany i zacząć od nowa?")) {
+                localStorage.removeItem('gym_user_data');
+                localStorage.removeItem('gym_custom_weekly_plans');
+                onboardingForm.reset(); 
+                window.location.reload(); 
+            }
+        });
+
+        function runWelcomeAnimationAndContinue() {
+            showScreen(welcomeScreen);
+            setTimeout(() => {
+                showScreen(dashboardScreen);
+            }, 3000);
+        }
+
+        checkApplicationState();
+    </script>
+</body>
+</html>
